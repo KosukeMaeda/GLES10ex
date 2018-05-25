@@ -1,12 +1,18 @@
 package jp.ac.titech.itpro.sdl.gles10ex;
 
 import android.opengl.GLSurfaceView;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.CompoundButton;
 import android.widget.SeekBar;
+import android.widget.Switch;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener {
     private final static String TAG = "MainActivity";
@@ -17,6 +23,12 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     private Cube cube;
     private Pyramid pyramid;
 
+    SeekBar seekBarX;
+    SeekBar seekBarY;
+    SeekBar seekBarZ;
+
+    Timer timer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,9 +36,9 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         setContentView(R.layout.activity_main);
 
         glView = findViewById(R.id.gl_view);
-        SeekBar seekBarX = findViewById(R.id.seekbar_x);
-        SeekBar seekBarY = findViewById(R.id.seekbar_y);
-        SeekBar seekBarZ = findViewById(R.id.seekbar_z);
+        seekBarX = findViewById(R.id.seekbar_x);
+        seekBarY = findViewById(R.id.seekbar_y);
+        seekBarZ = findViewById(R.id.seekbar_z);
         seekBarX.setMax(360);
         seekBarY.setMax(360);
         seekBarZ.setMax(360);
@@ -39,6 +51,20 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         pyramid = new Pyramid();
         renderer.setObj(cube, 0, 0, 0);
         glView.setRenderer(renderer);
+
+        Switch sw = findViewById(R.id.switch1);
+
+        sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    timer = new Timer();
+                    timer.scheduleAtFixedRate(new IncreaseTask(), 0, 30);
+                }else{
+                    if(timer != null) timer.cancel();
+                }
+            }
+        });
     }
 
     @Override
@@ -97,5 +123,14 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
+    }
+
+    private class IncreaseTask extends TimerTask{
+        @Override
+        public void run(){
+            seekBarX.setProgress((seekBarX.getProgress() + 1) % 360);
+            seekBarY.setProgress((seekBarY.getProgress() + 2) % 360);
+            seekBarZ.setProgress((seekBarZ.getProgress() + 3) % 360);
+        }
     }
 }
